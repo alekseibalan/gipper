@@ -1,3 +1,4 @@
+![Gipper logo](src/test/resources/gipper.png)
 # gipper
 Gipper - Your Personal Gipping Assistant
 
