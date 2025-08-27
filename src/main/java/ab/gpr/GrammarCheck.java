@@ -17,11 +17,14 @@
 
 package ab.gpr;
 
-import java.util.function.Consumer;
+import java.util.function.Function;
 
-/**
- * Checks grammar in a positive punishment way by crashing the system on mistake.
- * TODO: add a reinforcement option too
- */
-public interface GrammarCheck extends Consumer<String> {
+public interface GrammarCheck extends Function<String, String> {
+  /**
+   * Checks the grammar of a string.
+   * @param s the string to check
+   * @return {@code null} if no errors are found, or a string describing the error in free form
+   */
+  @Override
+  String apply(String s);
 }

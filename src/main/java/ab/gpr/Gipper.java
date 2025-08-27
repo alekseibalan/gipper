@@ -53,7 +53,8 @@ public class Gipper {
       } else {
         String inputFilter = filter.mask(s);
         System.out.println("/filterInput " + inputFilter);
-        grammarCheck.accept(inputFilter);
+        String grammarResult = grammarCheck.apply(inputFilter);
+        if (grammarResult != null) throw new IllegalStateException(grammarResult); // FIXME: let the user define the grammar error output
         history.add(inputFilter);
         String outputFilter = primary.apply(history);
         System.out.println("/filterOutput " + outputFilter);

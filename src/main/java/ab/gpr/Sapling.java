@@ -40,7 +40,7 @@ public class Sapling implements GrammarCheck {
   protected String saplingKey = Objects.requireNonNull(System.getenv("SAPLING_KEY"), "export SAPLING_KEY=");
 
   @Override
-  public void accept(String s) {
+  public String apply(String s) {
     final Map<String, Object> request = new LinkedHashMap<>();
     request.put("key", saplingKey);
     request.put("text", s);
@@ -55,6 +55,8 @@ public class Sapling implements GrammarCheck {
           ? new UncheckedIOException(new IOException("Invalid API key.")) : e;
     }
     List<Map<String, Object>> edits = (List) gson.fromJson(responseString, Map.class).get("edits");
+    if (edits.isEmpty()) return null;
+    StringBuilder stringBuilder = new StringBuilder();
     for (Map<String, Object> edit : edits) {
       String errorType = (String) edit.get("general_error_type");
       String description = (String) edit.get("description");
@@ -64,13 +66,10 @@ public class Sapling implements GrammarCheck {
       String replacement = (String) edit.get("replacement");
       String sentenceShort = sentence.substring(start, end);
       String replacementFull = sentence.substring(0, start) + replacement + sentence.substring(end);
-      System.out.println(String.format("%s error: %s, must use: %s", description, sentenceShort, replacement));
-      System.out.println(String.format("Error: %s, must use: %s", sentence, replacementFull));
+      stringBuilder.append(String.format("%s error: %s, must use: %s\n", description, sentenceShort, replacement));
+      stringBuilder.append(String.format("Error: %s, must use: %s\n", sentence, replacementFull));
     }
-    if (!edits.isEmpty()) {
-      System.out.println(responseString);
-      throw new IllegalStateException("bad grammar");
-    }
+    return stringBuilder.append(responseString).toString();
   }
 
 }

@@ -37,12 +37,13 @@ public class LanguageTool implements GrammarCheck {
       "Content-Type", "application/x-www-form-urlencoded");
 
   @Override
-  public void accept(String s) {
+  public String apply(String s) {
 //    String responseString = "";
     String responseString = new Http().post(url, headers,
         "language=en-US&text=" + URLEncoder.encode(s, StandardCharsets.UTF_8));
     JsonArray matches = JsonParser.parseString(responseString).getAsJsonObject().get("matches").getAsJsonArray();
     boolean errors = false;
+    StringBuilder stringBuilder = new StringBuilder();
     for (JsonElement match : matches) {
       String shortMessage = match.getAsJsonObject().get("shortMessage").getAsString();
       if ("Capitalization".equals(shortMessage)) continue;
@@ -57,13 +58,10 @@ public class LanguageTool implements GrammarCheck {
         int sentenceOffset = offset - indexOfSentence;
         message = sentence.substring(0, sentenceOffset) + replacement + sentence.substring(sentenceOffset + length);
       }
-      System.out.println(String.format("Error: %s, must use: %s", sentence, message));
+      stringBuilder.append(String.format("Error: %s, must use: %s\n", sentence, message));
       errors = true;
     }
-    if (errors) {
-      System.out.println(responseString);
-      throw new IllegalStateException("bad grammar");
-    }
+    return errors ? stringBuilder.append(responseString).toString() : null;
   }
 
 }

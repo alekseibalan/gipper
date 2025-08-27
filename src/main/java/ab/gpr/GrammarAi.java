@@ -35,14 +35,16 @@ public class GrammarAi implements GrammarCheck {
   }
 
   @Override
-  public void accept(String s) {
+  public String apply(String s) {
     List<String> list = new ArrayList<>(prompt);
     list.add("text: " + s);
     String json = modelApi.apply(list);
     List<Map<String, String>> errors = gson.fromJson(json, List.class);
-    for (Map<String, String> e : errors) System.out.println(
-        String.format("Error: %s, must use: %s", e.get("error"), e.get("correct")));
-    if (!errors.isEmpty()) throw new IllegalStateException("bad grammar");
+    if (errors.isEmpty()) return null;
+    StringBuilder stringBuilder = new StringBuilder();
+    for (Map<String, String> e : errors) stringBuilder.append(
+        String.format("Error: %s, must use: %s\n", e.get("error"), e.get("correct")));
+    return stringBuilder.toString();
   }
 
 }

@@ -35,17 +35,11 @@ public class Octopus implements ModelApi {
   // paid: gpt-4.1 $8.00, o3-mini $4.40
   // government-issued ID: o4-mini $4.40
   public String model = "gpt-4.1-nano";
-  public String systemPrompt;
 
   public Octopus() {
     String openaiApiKey = Objects.requireNonNull(System.getenv("OPENAI_API_KEY"), "export OPENAI_API_KEY=");
     headers.put("Content-Type", "application/json");
     headers.put("Authorization", "Bearer " + openaiApiKey);
-  }
-
-  @Override
-  public void setSystemPrompt(String systemPrompt) {
-    this.systemPrompt = systemPrompt;
   }
 
   private void addRoleContent(List<Map<String, String>> input, String role, String content) {
@@ -58,7 +52,7 @@ public class Octopus implements ModelApi {
   @Override
   public String apply(List<String> strings) {
     List<Map<String, String>> input = new ArrayList<>();
-    if (systemPrompt != null) addRoleContent(input, "system", systemPrompt);
+    //if (systemPrompt != null) addRoleContent(input, "system", systemPrompt);
     for (int i = 0, size = strings.size(); i < size; i++) {
       addRoleContent(input, (size - i) % 2 == 0 ? "assistant" : "user", strings.get(i));
     }
