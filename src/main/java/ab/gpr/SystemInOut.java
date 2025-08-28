@@ -36,4 +36,9 @@ public class SystemInOut implements User {
     Consumer<String> inListener = this.inListener;
     if (inListener != null) inListener.accept(scanner.nextLine());
   }
+
+  @Override
+  public void close() {
+  }
+
 }

@@ -20,11 +20,13 @@ package ab.gpr;
 public class Main {
 
   public static void main(String[] args) {
+    User user = new Localhost8080();
     Octopus grammarModelApi = new Octopus();
     grammarModelApi.model = "gpt-4o-mini";
     GrammarCheck grammarCheck = new GrammarAi(grammarModelApi);
     ModelApi modelApi = new Octopus();
-    new Gipper().run(new SystemInOut(), modelApi, new Filter(), new Sapling());
+    new Gipper().run(user, modelApi, new Filter(), new Sapling());
+    user.close();
   }
 
 }

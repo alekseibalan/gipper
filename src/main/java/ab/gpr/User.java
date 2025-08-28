@@ -19,7 +19,9 @@ package ab.gpr;
 
 import java.util.function.Consumer;
 
-public interface User {
+public interface User extends AutoCloseable {
   void setInListener(Consumer<String> inListener);
   void out(String s);
+  @Override
+  void close();
 }
