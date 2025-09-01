@@ -31,10 +31,20 @@ public class SystemInOut implements User {
   }
 
   @Override
-  public void out(String s) {
+  public void info(String s) {
     if (s != null) System.out.println(s);
     Consumer<String> inListener = this.inListener;
     if (inListener != null) inListener.accept(scanner.nextLine());
+  }
+
+  @Override
+  public void error(String s) {
+    info("\u001B[31m" + s + "\u001B[0m");
+  }
+
+  @Override
+  public void debug(String s) {
+    System.out.println("\u001B[34m" + s + "\u001B[0m");
   }
 
   @Override

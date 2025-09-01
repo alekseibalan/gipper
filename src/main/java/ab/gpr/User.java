@@ -21,7 +21,11 @@ import java.util.function.Consumer;
 
 public interface User extends AutoCloseable {
   void setInListener(Consumer<String> inListener);
-  void out(String s);
+  void info(String s);
+  default void debug(String s) {}
+  default void error(String s) {
+    info(s);
+  }
   @Override
   void close();
 }

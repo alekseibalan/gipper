@@ -2,14 +2,79 @@
 <head>
   <meta charset="utf-8" />
   <title>Gipper</title>
+  <style>
+    /* font */
+    main > div, footer > form > textarea {
+      font-size: 18px;
+      font-family: monospace;
+      padding: 10px 20px;
+      border-radius: 12px;
+    }
+    /* padding */
+    main, footer {
+      padding: 10px 20px;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(#ffffff, #99ccff);
+    }
+    main {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    main > div {
+      white-space: pre-wrap;
+    }
+    main > div.user {
+      max-width: 60%;
+      align-self: flex-end;
+      background: #cccccc;
+    }
+    main > div.error {
+      background: #ffcccc;
+    }
+    footer {
+      margin-top: auto;
+    }
+    footer > form > textarea {
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-  <main>
+  <main id="main">
     {{{main}}}
   </main>
-  <form method="POST">
-    <textarea name="m"></textarea>
-    <input type="submit">
+
+  <footer>
+  <form id="form" method="POST">
+    <textarea id="textarea" name="m" autofocus></textarea>
   </form>
+  </footer>
+
+  <script>
+    // Auto-scroll to bottom when page loads
+    window.onload = function() {
+      const main = document.getElementById('main');
+      main.scrollTop = main.scrollHeight;
+    };
+
+    // If user presses Enter (without Shift), submit the form.
+    const textarea = document.getElementById('textarea');
+    const form = document.getElementById('form');
+    textarea.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+        e.preventDefault(); // prevent adding a newline
+        form.submit();      // regular POST submit to the form's action
+      }
+    });
+  </script>
+
 </body>
 </html>

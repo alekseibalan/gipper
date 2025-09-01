@@ -39,7 +39,7 @@ public class Gipper {
 
   public void run(User user, ModelApi primary, Filter filter, GrammarCheck grammarCheck) {
     user.setInListener(queue::add);
-    user.out("/bye to exit");
+    user.info("/bye to exit");
     String s;
     while (true) {
       try {
@@ -47,19 +47,23 @@ public class Gipper {
       } catch (InterruptedException e) {
         break;
       }
-      if (s.charAt(0) == '/') {
-        if ("/bye".equals(s)) break;
-        throw new IllegalStateException();
-      } else {
-        String inputFilter = filter.mask(s);
-        System.out.println("/filterInput " + inputFilter);
-        String grammarResult = grammarCheck.apply(inputFilter);
-        if (grammarResult != null) throw new IllegalStateException(grammarResult); // FIXME: let the user define the grammar error output
-        history.add(inputFilter);
-        String outputFilter = primary.apply(history);
-        System.out.println("/filterOutput " + outputFilter);
-        history.add(outputFilter);
-        user.out(filter.unmask(outputFilter));
+      try {
+        if (s.charAt(0) == '/') {
+          if ("/bye".equals(s)) break;
+          throw new IllegalStateException();
+        } else {
+          String inputFilter = filter.mask(s);
+          user.debug("/filterInput " + inputFilter);
+          String grammarResult = grammarCheck.apply(inputFilter);
+          if (grammarResult != null) throw new IllegalStateException(grammarResult); // FIXME: let the user define the grammar error output
+          history.add(inputFilter);
+          String outputFilter = primary.apply(history);
+          user.debug("/filterOutput " + outputFilter);
+          history.add(outputFilter);
+          user.info(filter.unmask(outputFilter));
+        }
+      } catch (Exception e) {
+        user.error(e.getMessage());
       }
     }
   }

@@ -36,9 +36,23 @@ import static ab.MuCrisp.m;
 
 public class Localhost8080 implements User {
 
+  public static class Message {
+    final String s;
+    final String c;
+
+    public Message(String s) {
+      this(s, null);
+    }
+
+    public Message(String s, String c) {
+      this.s = s;
+      this.c = c;
+    }
+  }
+
   protected HttpServer server;
   protected Consumer<String> inListener;
-  protected List<String> list = new ArrayList<>();
+  protected List<Message> list = new ArrayList<>();
 
   public Localhost8080() {
     try {
@@ -64,11 +78,23 @@ public class Localhost8080 implements User {
   }
 
   @Override
-  public void out(String s) {
-    list.add(s);
+  public void info(String s) {
+    list.add(new Message(s));
     synchronized (list) {
       list.notify();
     }
+  }
+
+  @Override
+  public void error(String s) {
+    list.add(new Message(s, "error"));
+    synchronized (list) {
+      list.notify();
+    }
+  }
+
+  public String ltGt(String s) {
+    return s.replace("<", "&lt;").replace(">", "&gt;");
   }
 
   public void handle(HttpExchange exchange) throws IOException {
@@ -78,7 +104,7 @@ public class Localhost8080 implements User {
         String s = new String(stream.readAllBytes());
         if (listener != null && s.startsWith("m=")) {
           s = URLDecoder.decode(s.substring(2), StandardCharsets.UTF_8);
-          list.add(s);
+          list.add(new Message(s, "user"));
           listener.accept(s);
           synchronized (list) {
             try { list.wait(); } catch (InterruptedException ignore) {}
@@ -89,7 +115,9 @@ public class Localhost8080 implements User {
     String response;
     try {
       response = m("html",
-          m("main", list.stream().map(s -> "<div>" + s + "</div>\n").collect(Collectors.joining()))
+          m("main", list.stream()
+              .map(m -> "<div" + (m.c == null ? "" : " class=" + m.c) + ">" + ltGt(m.s) + "</div>\n")
+              .collect(Collectors.joining()))
       ).toString();
     } catch (Exception e) {
       throw e;

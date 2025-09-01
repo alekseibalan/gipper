@@ -24,7 +24,8 @@ public class Main {
     Octopus grammarModelApi = new Octopus();
     grammarModelApi.model = "gpt-4o-mini";
     GrammarCheck grammarCheck = new GrammarAi(grammarModelApi);
-    ModelApi modelApi = new Octopus();
+    Octopus modelApi = new Octopus();
+    modelApi.model = "gpt-4o-mini";
     new Gipper().run(user, modelApi, new Filter(), new Sapling());
     user.close();
   }
