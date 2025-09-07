@@ -17,38 +17,43 @@
 
 package ab.gpr;
 
+import java.util.List;
 import java.util.Scanner;
-import java.util.function.Consumer;
+import java.util.UUID;
 
 public class SystemInOut implements User {
 
-  protected Consumer<String> inListener;
   protected Scanner scanner = new Scanner(System.in);
 
-  @Override
-  public void setInListener(Consumer<String> inListener) {
-    this.inListener = inListener;
+  public void printMessages(List<Chat.Message> messages) {
+    for (Chat.Message message : messages) {
+      String s = message.s;
+      switch (message.c) {
+        case USER: s = "\u001B[3m\u001B[38:5:28m" + s + "\u001B[0m"; break;
+        case ERROR: s = "\u001B[31m" + s + "\u001B[0m"; break;
+        case DEBUG: s = "\u001B[34m" + s + "\u001B[0m"; break;
+      }
+      System.out.println(s);
+    }
   }
 
   @Override
-  public void info(String s) {
-    if (s != null) System.out.println(s);
-    Consumer<String> inListener = this.inListener;
-    if (inListener != null) inListener.accept(scanner.nextLine());
-  }
-
-  @Override
-  public void error(String s) {
-    info("\u001B[31m" + s + "\u001B[0m");
-  }
-
-  @Override
-  public void debug(String s) {
-    System.out.println("\u001B[34m" + s + "\u001B[0m");
-  }
-
-  @Override
-  public void close() {
+  public void run(Gipper gipper) {
+    List<Chat> chats = gipper.listChats();
+    UUID chatUuid = chats.isEmpty() ? gipper.newChatUuid() : chats.get(0).uuid;
+    System.out.println("/bye to exit, gipper -w for web");
+    printMessages(gipper.loadChatMessages(chatUuid));
+    String s;
+    while (true) {
+      s = scanner.nextLine();
+      if (s.charAt(0) == '/') {
+        if ("/bye".equals(s)) break;
+        throw new IllegalStateException();
+      } else {
+        List<Chat.Message> messages = gipper.gipp(chatUuid, s);
+        printMessages(messages);
+      }
+    }
   }
 
 }

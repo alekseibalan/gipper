@@ -17,15 +17,6 @@
 
 package ab.gpr;
 
-import java.util.function.Consumer;
-
-public interface User extends AutoCloseable {
-  void setInListener(Consumer<String> inListener);
-  void info(String s);
-  default void debug(String s) {}
-  default void error(String s) {
-    info(s);
-  }
-  @Override
-  void close();
+public interface User {
+  void run(Gipper gipper);
 }

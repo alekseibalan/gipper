@@ -27,34 +27,20 @@ import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ab.MuCrisp.m;
 
 public class Localhost8080 implements User {
 
-  public static class Message {
-    final String s;
-    final String c;
-
-    public Message(String s) {
-      this(s, null);
-    }
-
-    public Message(String s, String c) {
-      this.s = s;
-      this.c = c;
-    }
-  }
-
   protected HttpServer server;
-  protected Consumer<String> inListener;
-  protected List<Message> list = new ArrayList<>();
+  protected Gipper gipper;
 
-  public Localhost8080() {
+  @Override
+  public void run(Gipper gipper) {
+    this.gipper = gipper;
     try {
       server = HttpServer.create(new InetSocketAddress(8080), 0);
     } catch (IOException e) {
@@ -62,35 +48,13 @@ public class Localhost8080 implements User {
     }
     server.createContext("/", this::handle);
     server.start();
-  }
-
-  @Override
-  public void close() {
-    synchronized (list) {
-      list.notifyAll();
+    System.out.println("http://localhost:8080/");
+    synchronized (server) {
+      try {
+        while (true) server.wait();
+      } catch (InterruptedException ignore) {}
     }
     server.stop(1);
-  }
-
-  @Override
-  public void setInListener(Consumer<String> inListener) {
-    this.inListener = inListener;
-  }
-
-  @Override
-  public void info(String s) {
-    list.add(new Message(s));
-    synchronized (list) {
-      list.notify();
-    }
-  }
-
-  @Override
-  public void error(String s) {
-    list.add(new Message(s, "error"));
-    synchronized (list) {
-      list.notify();
-    }
   }
 
   public String ltGt(String s) {
@@ -98,24 +62,36 @@ public class Localhost8080 implements User {
   }
 
   public void handle(HttpExchange exchange) throws IOException {
+    String uri = exchange.getRequestURI().toString();
+    UUID session = null;
+    if (uri.length() == 37 && uri.charAt(0) == '/') {
+      try {
+        session = UUID.fromString(uri.substring(1));
+      } catch (IllegalArgumentException ignore) {}
+    }
+    if (session == null) {
+      exchange.getResponseHeaders().add("Location", "/" + gipper.newChatUuid());
+      exchange.sendResponseHeaders(302, 0);
+      exchange.getResponseBody().close();
+      return;
+    }
+
     if ("POST".equals(exchange.getRequestMethod())) {
-      Consumer<String> listener = inListener;
       try (InputStream stream = exchange.getRequestBody()) {
         String s = new String(stream.readAllBytes());
-        if (listener != null && s.startsWith("m=")) {
+        if (s.startsWith("m=")) {
           s = URLDecoder.decode(s.substring(2), StandardCharsets.UTF_8);
-          list.add(new Message(s, "user"));
-          listener.accept(s);
-          synchronized (list) {
-            try { list.wait(); } catch (InterruptedException ignore) {}
-          }
+          gipper.gipp(session, s);
         }
       }
     }
+
     String response;
     try {
+      List<Chat.Message> list = gipper.loadChatMessages(session);
       response = m("html",
           m("main", list.stream()
+              .filter(m -> !Chat.MessageType.DEBUG.equals(m.c))
               .map(m -> "<div" + (m.c == null ? "" : " class=" + m.c) + ">" + ltGt(m.s) + "</div>\n")
               .collect(Collectors.joining()))
       ).toString();

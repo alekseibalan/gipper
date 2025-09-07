@@ -18,54 +18,82 @@
 package ab.gpr;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class Gipper {
 
-  protected final List<String> history = new ArrayList<>();
-  public final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+  protected final Map<UUID, Chat> sessions = new LinkedHashMap<>();
+  protected final ModelApi modelApi;
+  protected final GrammarCheck grammarCheck;
+  protected final Filter filter;
 
-  public Gipper() {
-    history.add("You are Marv, a chatbot that reluctantly answers questions with sarcastic responses.\n" +
-        "How many pounds are in a kilogram?");
-    history.add("This again? There are 2.2 pounds in a kilogram. Please make a note of this.");
-    history.add("What does HTML stand for?");
-    history.add("Was Google too busy? Hypertext Markup Language. The T is for try to ask better questions in the future.");
-    history.add("When did the first airplane fly?");
-    history.add("On December 17, 1903, Wilbur and Orville Wright made the first flights. I wish they’d come and take me away.");
+  public Gipper(ModelApi modelApi, GrammarCheck grammarCheck, Filter filter) {
+    this.modelApi = modelApi;
+    this.grammarCheck = grammarCheck;
+    this.filter = filter;
   }
 
-  public void run(User user, ModelApi primary, Filter filter, GrammarCheck grammarCheck) {
-    user.setInListener(queue::add);
-    user.info("/bye to exit");
-    String s;
-    while (true) {
-      try {
-        s = queue.take();
-      } catch (InterruptedException e) {
-        break;
-      }
-      try {
-        if (s.charAt(0) == '/') {
-          if ("/bye".equals(s)) break;
-          throw new IllegalStateException();
-        } else {
-          String inputFilter = filter.mask(s);
-          user.debug("/filterInput " + inputFilter);
-          String grammarResult = grammarCheck.apply(inputFilter);
-          if (grammarResult != null) throw new IllegalStateException(grammarResult); // FIXME: let the user define the grammar error output
-          history.add(inputFilter);
-          String outputFilter = primary.apply(history);
-          user.debug("/filterOutput " + outputFilter);
-          history.add(outputFilter);
-          user.info(filter.unmask(outputFilter));
+  protected List<Chat.Message> defaultPrompt() {
+    List<Chat.Message> messages = new ArrayList<>();
+    String[] prompt = {"You are Marv, a chatbot that reluctantly answers questions with sarcastic responses.\n" +
+        "How many pounds are in a kilogram?",
+        "This again? There are 2.2 pounds in a kilogram. Please make a note of this.",
+        "What does HTML stand for?",
+        "Was Google too busy? Hypertext Markup Language. The T is for try to ask better questions in the future.",
+        "When did the first airplane fly?",
+        "On December 17, 1903, Wilbur and Orville Wright made the first flights. I wish they’d come and take me away."};
+    for (String s : prompt) messages.add(new Chat.Message(s, Chat.MessageType.PROMPT));
+    return messages;
+  }
+
+  public UUID newChatUuid() {
+    Chat chat = new Chat(defaultPrompt());
+    sessions.put(chat.uuid, chat);
+    return chat.uuid;
+  }
+
+  public List<Chat> listChats() {
+    return Chat.list();
+  }
+
+  public List<Chat.Message> loadChatMessages(UUID uuid) {
+    Chat chat = sessions.computeIfAbsent(uuid, Chat::load);
+    return chat.getMessages().stream().filter(m -> !Chat.MessageType.PROMPT.equals(m.c))
+        .collect(Collectors.toList());
+  }
+
+  public List<Chat.Message> gipp(UUID uuid, String s) {
+    Chat chat = sessions.get(uuid);
+    chat.add(new Chat.Message(s, Chat.MessageType.USER));
+    ArrayList<Chat.Message> list = new ArrayList<>();
+    try {
+      list.add(new Chat.Message("debug", Chat.MessageType.DEBUG));
+      String grammarResult = grammarCheck.apply(s);
+      if (grammarResult != null) throw new IllegalStateException(grammarResult);
+      ArrayList<String> inputApi = new ArrayList<>();
+      for (Chat.Message message : chat.getMessages()) {
+        switch (message.c) {
+          case DEBUG: break;
+          case ERROR: inputApi.remove(inputApi.size() - 1); break;
+          default: inputApi.add(message.s);
         }
-      } catch (Exception e) {
-        user.error(e.getMessage());
       }
+      String outputApi = modelApi.apply(inputApi);
+      list.add(new Chat.Message(outputApi, Chat.MessageType.INFO));
+    } catch (Exception e) {
+      list.add(new Chat.Message(e.getMessage(), Chat.MessageType.ERROR));
     }
+    list.forEach(chat::add); // chat.addAll(list);
+    chat.save();
+    return list;
+  }
+
+  public void run(User user) {
+    user.run(this);
   }
 
 }

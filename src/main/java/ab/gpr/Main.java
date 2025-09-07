@@ -17,17 +17,21 @@
 
 package ab.gpr;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class Main {
 
   public static void main(String[] args) {
-    User user = new Localhost8080();
+    Set<String> argSet = Arrays.stream(args).collect(Collectors.toSet());
+    User user = argSet.contains("-w") ? new Localhost8080() : new SystemInOut();
     Octopus grammarModelApi = new Octopus();
     grammarModelApi.model = "gpt-4o-mini";
     GrammarCheck grammarCheck = new GrammarAi(grammarModelApi);
     Octopus modelApi = new Octopus();
     modelApi.model = "gpt-4o-mini";
-    new Gipper().run(user, modelApi, new Filter(), new Sapling());
-    user.close();
+    new Gipper(modelApi, new Sapling(), new Filter()).run(user);
   }
 
 }

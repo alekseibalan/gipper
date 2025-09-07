@@ -65,7 +65,7 @@ public class MuCrisp {
     for (MuCrisp muCrisp : muCrisps) {
       String value = muCrisp.toString();
       int lastChar = value.length() - 1;
-      if (value.charAt(lastChar) == '\n') value = value.substring(0, lastChar);
+      if (lastChar >= 0 && value.charAt(lastChar) == '\n') value = value.substring(0, lastChar);
       map.put(muCrisp.key, value);
     }
     StringWriter writer = new StringWriter();
