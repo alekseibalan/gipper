@@ -27,7 +27,6 @@ import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -88,12 +87,14 @@ public class Localhost8080 implements User {
 
     String response;
     try {
-      List<Chat.Message> list = gipper.loadChatMessages(session);
       response = m("html",
-          m("main", list.stream()
+          m("main", gipper.loadChatMessages(session).stream()
               .filter(m -> !Chat.MessageType.DEBUG.equals(m.c))
               .map(m -> "<div" + (m.c == null ? "" : " class=" + m.c) + ">" + ltGt(m.s) + "</div>\n")
-              .collect(Collectors.joining()))
+              .collect(Collectors.joining())),
+          m("nav", gipper.listChats().stream()
+              .map(c -> "<div><a href=\"" + c.uuid + "\">" + ltGt(c.title.isEmpty() ? c.uuid.toString() : c.title) +
+                  "</a></div>\n").collect(Collectors.joining()))
       ).toString();
     } catch (Exception e) {
       throw e;

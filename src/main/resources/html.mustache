@@ -4,25 +4,35 @@
   <title>Gipper</title>
   <style>
     /* font */
-    main > div, footer > form > textarea {
+    main > div, footer > form > textarea, nav > div {
       font-size: 18px;
       font-family: monospace;
       padding: 10px 20px;
       border-radius: 12px;
     }
     /* padding */
-    main, footer {
+    main, footer, nav {
       padding: 10px 20px;
     }
 
     body {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr 3fr;
+      grid-template-rows: 1fr auto;
       height: 100vh;
       margin: 0;
       background: linear-gradient(#ffffff, #99ccff);
     }
-    main {
+    nav {
+      grid-row: 1 / -1;
+      background-color: rgba(0,0,0,0.05);
+      gap: 10px;
+    }
+    nav > div > a {
+      text-decoration: none;
+      color: black;
+    }
+    main, nav {
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -37,6 +47,7 @@
       background: #cccccc;
     }
     main > div.error {
+      max-width: fit-content;
       background: #ffcccc;
     }
     footer {
@@ -48,6 +59,11 @@
   </style>
 </head>
 <body>
+  <nav>
+    <div><a href="/">&#x1F4DD; New chat</a></div>
+    {{{nav}}}
+  </nav>
+
   <main id="main">
     {{{main}}}
   </main>
