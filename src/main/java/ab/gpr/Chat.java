@@ -36,11 +36,15 @@ import java.util.UUID;
 public class Chat {
   protected static final String FILE_PREFIX = "assets/gipper_";
   protected static final String FILE_SUFFIX = ".txt";
+  protected static List<String> titlePrompt;
   public final UUID uuid;
   public String title = "";
   private final List<Message> messages;
 
   public Chat(UUID uuid) {
+    if (titlePrompt == null) {
+      titlePrompt = Prompt.read(getClass().getResourceAsStream("title_prompt.txt"));
+    }
     this.uuid = uuid;
     this.messages = new ArrayList<>();
   }
@@ -60,6 +64,20 @@ public class Chat {
 
   public void add(Message message) {
     messages.add(message);
+  }
+
+  public void makeTitle(ModelApi modelApi) {
+    String user = "?";
+    StringBuilder stringBuilder = new StringBuilder();
+    for (Chat.Message message : messages) {
+      switch (message.c) {
+        case USER: user = message.s; break;
+        case ROBOT: stringBuilder.append("user: " + user + "\nrobot: " + message.s + "\n"); break;
+      }
+    }
+    List<String> list = new ArrayList<>(titlePrompt);
+    list.add(stringBuilder.toString());
+    title = modelApi.apply(list);
   }
 
   public void save() {
@@ -124,7 +142,7 @@ public class Chat {
   }
 
   public enum MessageType {
-    USER, INFO, ERROR, DEBUG, PROMPT
+    PROMPT, USER, ROBOT, ERROR, DEBUG
   }
 
   public static class Message {

@@ -31,7 +31,7 @@ public class GrammarAi implements GrammarCheck {
 
   public GrammarAi(ModelApi modelApi) {
     this.modelApi = modelApi;
-    this.prompt = Prompt.read(getClass().getResourceAsStream("GrammarPrompt.txt"));
+    this.prompt = Prompt.read(getClass().getResourceAsStream("grammar_prompt.txt"));
   }
 
   @Override

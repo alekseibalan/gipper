@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class Gipper {
@@ -51,13 +52,28 @@ public class Gipper {
   }
 
   public UUID newChatUuid() {
-    Chat chat = new Chat(defaultPrompt());
+    return newChatUuid("default");
+  }
+
+  public UUID newChatUuid(String prompt) {
+    List<Chat.Message> messages = new ArrayList<>();
+    List<String> list = Prompt.read(getClass().getResourceAsStream(prompt + "_prompt.txt"));
+    for (String s : list) messages.add(new Chat.Message(s, Chat.MessageType.PROMPT));
+    Chat chat = new Chat(messages);
     sessions.put(chat.uuid, chat);
     return chat.uuid;
   }
 
   public List<Chat> listChats() {
-    return Chat.list();
+    return Chat.list().stream().map(chat -> {
+      if (chat.title.isEmpty()) {
+        UUID uuid = chat.uuid;
+        chat = new Chat(uuid);
+        Chat c = sessions.get(uuid);
+        chat.title = c == null || c.title.isEmpty() ? uuid.toString() : c.title;
+      }
+      return chat;
+    }).collect(Collectors.toList());
   }
 
   public List<Chat.Message> loadChatMessages(UUID uuid) {
@@ -71,7 +87,7 @@ public class Gipper {
     chat.add(new Chat.Message(s, Chat.MessageType.USER));
     ArrayList<Chat.Message> list = new ArrayList<>();
     try {
-      list.add(new Chat.Message("debug", Chat.MessageType.DEBUG));
+      //list.add(new Chat.Message("debug", Chat.MessageType.DEBUG));
       String grammarResult = grammarCheck.apply(s);
       if (grammarResult != null) throw new IllegalStateException(grammarResult);
       ArrayList<String> inputApi = new ArrayList<>();
@@ -83,12 +99,16 @@ public class Gipper {
         }
       }
       String outputApi = modelApi.apply(inputApi);
-      list.add(new Chat.Message(outputApi, Chat.MessageType.INFO));
+      list.add(new Chat.Message(outputApi, Chat.MessageType.ROBOT));
     } catch (Exception e) {
       list.add(new Chat.Message(e.getMessage(), Chat.MessageType.ERROR));
     }
     list.forEach(chat::add); // chat.addAll(list);
     chat.save();
+    if (chat.title.isEmpty()) {
+      long count = chat.getMessages().stream().filter(m -> Chat.MessageType.ROBOT.equals(m.c)).count();
+      if (count > 4) CompletableFuture.runAsync(() -> chat.makeTitle(modelApi));
+    }
     return list;
   }
 

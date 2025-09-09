@@ -57,7 +57,7 @@ public class Localhost8080 implements User {
   }
 
   public String ltGt(String s) {
-    return s.replace("<", "&lt;").replace(">", "&gt;");
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
   }
 
   public void handle(HttpExchange exchange) throws IOException {
@@ -69,7 +69,8 @@ public class Localhost8080 implements User {
       } catch (IllegalArgumentException ignore) {}
     }
     if (session == null) {
-      exchange.getResponseHeaders().add("Location", "/" + gipper.newChatUuid());
+      UUID uuid = uri.startsWith("/new/") ? gipper.newChatUuid(uri.substring(5)) : gipper.newChatUuid();
+      exchange.getResponseHeaders().add("Location", "/" + uuid);
       exchange.sendResponseHeaders(302, 0);
       exchange.getResponseBody().close();
       return;
