@@ -22,7 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class Gipper {
@@ -104,11 +103,11 @@ public class Gipper {
       list.add(new Chat.Message(e.getMessage(), Chat.MessageType.ERROR));
     }
     list.forEach(chat::add); // chat.addAll(list);
-    chat.save();
     if (chat.title.isEmpty()) {
       long count = chat.getMessages().stream().filter(m -> Chat.MessageType.ROBOT.equals(m.c)).count();
-      if (count > 4) CompletableFuture.runAsync(() -> chat.makeTitle(modelApi));
+      if (count > 2) chat.makeTitle(modelApi); // CompletableFuture.runAsync(() -> chat.makeTitle(modelApi));
     }
+    chat.save();
     return list;
   }
 

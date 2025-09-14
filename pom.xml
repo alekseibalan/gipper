@@ -38,6 +38,7 @@
 
   <dependencies>
     <dependency>
+      <!-- 300KiB of dependencies, less than 2MiB -->
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>2.13.1</version>
@@ -46,6 +47,17 @@
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>compiler</artifactId>
       <version>0.9.14</version>
+    </dependency>
+    <dependency>
+      <!-- 200KiB of dependencies, less than 22MiB, less than 1MiB -->
+      <groupId>org.commonmark</groupId>
+      <artifactId>commonmark</artifactId>
+      <version>0.26.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.commonmark</groupId>
+      <artifactId>commonmark-ext-gfm-tables</artifactId>
+      <version>0.26.0</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>

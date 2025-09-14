@@ -4,9 +4,11 @@
   <title>Gipper</title>
   <style>
     /* font */
+    body {
+      font-family: ui-sans-serif, system-ui, sans-serif;
+    }
     main > div, footer > form > textarea, nav > div {
-      font-size: 18px;
-      font-family: monospace;
+      font-size: 1rem;
       padding: 10px 20px;
       border-radius: 12px;
     }
@@ -14,7 +16,132 @@
     main, footer, nav {
       padding: 10px 20px;
     }
-
+    /* markdown */
+    main {
+      line-height: 1.75;
+    }
+    main p {
+      margin: 0.5rem 0 0.25rem;
+    }
+    main h1 {
+      font-size: 1.5rem;
+      line-height: 1.33333;
+      margin: 0 0 0.5rem;
+    }
+    main h2 {
+      font-size: 1.25rem;
+      line-height: 1.4;
+      margin: 1rem 0 0.25rem;
+    }
+    main h3 {
+      font-size: 1.125rem;
+      line-height: 1.55556;
+      margin: 1rem 0 0.25rem;
+    }
+    main h4 {
+      font-size: 1rem;
+      line-height: 1.5;
+      margin: 1rem 0 0;
+    }
+    main h4 + p {
+      margin-top: 0;
+    }
+    main h5 {
+      font-size: 1rem;
+      margin: 0;
+    }
+    main h6 {
+      font-size: 1rem;
+      font-weight: inherit;
+      margin: 0;
+    }
+    main ol {
+      margin: 0;
+      padding: 0;
+      padding-inline-start: 1.625em;
+    }
+    main ul {
+      margin: 0;
+      padding: 0;
+      padding-inline-start: 1.625em;
+      list-style-type: disc;
+    }
+    main li {
+      padding-inline-start: .375em;
+    }
+    main li p {
+      margin: 0;
+    }
+    main li::marker {
+      font-weight: bold;
+      color: #5d5d5d;
+    }
+    main hr {
+      border-width: 1px 0 0 0;
+      margin: 1.75rem 0;
+      border-color: #00000026;
+    }
+    main pre {
+      font-size: 0.875rem;
+      line-height: 1.2;
+      border: 1px solid #00000026;
+      border-radius: 1rem;
+      margin: 0.5rem -20px 0 -20px;
+      padding: 10px 0 10px 20px;
+    }
+    main code {
+      font-family: ui-monospace, monospace;
+    }
+    main table {
+      font-size: .875rem;
+    }
+    main th, main td {
+      text-align: left;
+      vertical-align: baseline;
+      padding-block: 0.5rem;
+      padding-inline-start: 0;
+      padding-inline-end: 1.5rem;
+      min-width: 12rem;
+      max-width: 16rem;
+      border-color: #00000026;
+      border-bottom-style: solid;
+      border-bottom-width: 1px;
+      line-height: 1rem;
+    }
+    main td {
+      line-height: 1.71429;
+      border-color: #0d0d0d0d;
+    }
+    main th:last-child, main td:last-child {
+      /* last column */
+      padding-inline-end: 0rem;
+    }
+    main tr:last-child td {
+      /* last row */
+      border-bottom-width: 0;
+      padding-bottom: 1.5rem;
+    }
+    /* fine tuning */
+/*
+    main {
+      margin-left: 106px;
+      margin-right: 246px;
+    }
+    main code {
+      font-family: Liberation Mono, monospace;
+    }
+    main pre {
+      background-color: #f9f9f9;
+      margin: 0.5rem 0 0;
+      border-radius: 1rem;
+      font-size: 0.875rem;
+      line-height: 1.71429;
+      padding: 52px 0 16px 16px;
+    }
+    main table {
+      width: 949px;
+    }
+*/
     body {
       display: grid;
       grid-template-columns: 1fr 3fr;
@@ -25,7 +152,7 @@
     }
     nav {
       grid-row: 1 / -1;
-      background-color: rgba(0,0,0,0.05);
+      background-color: #00000008;
       gap: 10px;
     }
     nav > div > a {
@@ -38,10 +165,8 @@
       flex-direction: column;
       gap: 10px;
     }
-    main > div {
-      white-space: pre-wrap;
-    }
     main > div.user {
+      line-height: 1.2;
       max-width: 60%;
       align-self: flex-end;
       background: #cccccc;
@@ -49,6 +174,10 @@
     main > div.error {
       max-width: fit-content;
       background: #ffcccc;
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      line-height: 1;
+      white-space: pre-wrap;
     }
     footer {
       margin-top: auto;

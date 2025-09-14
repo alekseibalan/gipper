@@ -19,6 +19,10 @@ package ab.gpr;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import org.commonmark.Extension;
+import org.commonmark.ext.gfm.tables.TablesExtension;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +31,7 @@ import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,6 +41,9 @@ public class Localhost8080 implements User {
 
   protected HttpServer server;
   protected Gipper gipper;
+  protected List<Extension> extensions = List.of(TablesExtension.create());
+  protected Parser parser = Parser.builder().extensions(extensions).build();
+  protected HtmlRenderer renderer = HtmlRenderer.builder().extensions(extensions).build();
 
   @Override
   public void run(Gipper gipper) {
@@ -54,6 +62,12 @@ public class Localhost8080 implements User {
       } catch (InterruptedException ignore) {}
     }
     server.stop(1);
+  }
+
+  public String toHtml(String s, Chat.MessageType c) {
+    if (Chat.MessageType.ROBOT.equals(c)) return renderer.render(parser.parse(s));
+        //.replace("<li>", "<li><p><p><p>").replace("</li>", "</p></p></p></li>");
+    return ltGt(s);
   }
 
   public String ltGt(String s) {
@@ -91,7 +105,7 @@ public class Localhost8080 implements User {
       response = m("html",
           m("main", gipper.loadChatMessages(session).stream()
               .filter(m -> !Chat.MessageType.DEBUG.equals(m.c))
-              .map(m -> "<div" + (m.c == null ? "" : " class=" + m.c) + ">" + ltGt(m.s) + "</div>\n")
+              .map(m -> "<div" + (m.c == null ? "" : " class=" + m.c) + ">" + toHtml(m.s, m.c) + "</div>\n")
               .collect(Collectors.joining())),
           m("nav", gipper.listChats().stream()
               .map(c -> "<div><a href=\"" + c.uuid + "\">" + ltGt(c.title.isEmpty() ? c.uuid.toString() : c.title) +

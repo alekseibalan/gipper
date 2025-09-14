@@ -66,8 +66,10 @@ public class Sapling implements GrammarCheck {
       String replacement = (String) edit.get("replacement");
       String sentenceShort = sentence.substring(start, end);
       String replacementFull = sentence.substring(0, start) + replacement + sentence.substring(end);
-      stringBuilder.append(String.format("%s error: %s, must use: %s\n", description, sentenceShort, replacement));
-      stringBuilder.append(String.format("Error: %s, must use: %s\n", sentence, replacementFull));
+      //stringBuilder.append(String.format("%s error: %s, must use: %s\n", description, sentenceShort, replacement));
+      //stringBuilder.append(String.format("Error: %s, must use: %s\n", sentence, replacementFull));
+      stringBuilder.append(String.format("bad: %s\nuse: %s\n", sentenceShort, replacement));
+      stringBuilder.append(String.format("%s %s\n\n", replacementFull, description));
     }
     return stringBuilder.append(responseString).toString();
   }
