@@ -26,12 +26,9 @@ public class Main {
   public static void main(String[] args) {
     Set<String> argSet = Arrays.stream(args).collect(Collectors.toSet());
     User user = argSet.contains("-w") ? new Localhost8080() : new SystemInOut();
-    Octopus grammarModelApi = new Octopus();
-    grammarModelApi.model = "gpt-4o-mini";
-    GrammarCheck grammarCheck = new GrammarAi(grammarModelApi);
-    Octopus modelApi = new Octopus();
-    modelApi.model = "gpt-4o-mini";
-    new Gipper(modelApi, new Sapling(), new Filter()).run(user);
+    GrammarCheck grammarCheck = new GrammarAi(new Octopus().model("gpt-4o-mini"));
+    ModelApi modelApi = new Camel().model("phi4-mini");
+    new Gipper(modelApi, new LanguageTool(), new Filter()).run(user);
   }
 
 }

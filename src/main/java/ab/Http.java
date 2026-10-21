@@ -24,6 +24,7 @@ import java.io.UncheckedIOException;
 import java.net.HttpRetryException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Scanner;
@@ -52,6 +53,20 @@ public class Http {
     } catch (IOException e) {
       if (e instanceof HttpRetryException) e = new IOException( // misleading "cannot retry" exception
           "Server returned HTTP response code: " + ((HttpRetryException) e).responseCode() + " for URL: " + url);
+      throw new UncheckedIOException(e);
+    }
+  }
+
+
+  public String get(String url) {
+    try {
+      URLConnection urlConnection = new URL(url).openConnection();
+      urlConnection.setRequestProperty("User-Agent", USER_AGENT);
+      try (InputStream inputStream = urlConnection.getInputStream();
+          Scanner scanner = new Scanner(inputStream).useDelimiter("\\Z")) {
+        return scanner.next();
+      }
+    } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
   }

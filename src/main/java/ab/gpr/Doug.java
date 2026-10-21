@@ -44,6 +44,11 @@ public class Doug implements ModelApi {
       " an angel visited this gray path and took the cube away";
 
   @Override
+  public ModelApi model(String model) {
+    throw new IllegalStateException();
+  }
+
+  @Override
   public String apply(List<String> strings) {
     String s = strings.get(strings.size() - 1);
     if (s.length() < FIGURE.length()) return FIGURE;

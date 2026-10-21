@@ -34,12 +34,18 @@ public class Octopus implements ModelApi {
   // free: gpt-4.1-mini $1.60, gpt-4.1-nano $0.40, gpt-4o-mini $0.60
   // paid: gpt-4.1 $8.00, o3-mini $4.40
   // government-issued ID: o4-mini $4.40
-  public String model = "gpt-4.1-nano";
+  String model = "gpt-4.1-nano";
 
   public Octopus() {
     String openaiApiKey = Objects.requireNonNull(System.getenv("OPENAI_API_KEY"), "export OPENAI_API_KEY=");
     headers.put("Content-Type", "application/json");
     headers.put("Authorization", "Bearer " + openaiApiKey);
+  }
+
+  @Override
+  public Octopus model(String model) {
+    this.model = model;
+    return this;
   }
 
   private void addRoleContent(List<Map<String, String>> input, String role, String content) {
