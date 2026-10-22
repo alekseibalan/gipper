@@ -57,11 +57,11 @@ public class Http {
     }
   }
 
-
-  public String get(String url) {
+  public String get(String url, Map<String, String> headers) {
     try {
       URLConnection urlConnection = new URL(url).openConnection();
       urlConnection.setRequestProperty("User-Agent", USER_AGENT);
+      headers.forEach(urlConnection::setRequestProperty);
       try (InputStream inputStream = urlConnection.getInputStream();
           Scanner scanner = new Scanner(inputStream).useDelimiter("\\Z")) {
         return scanner.next();

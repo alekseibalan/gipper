@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Chat {
@@ -151,8 +152,8 @@ public class Chat {
     public final Instant instant;
 
     public Message(String s, MessageType c, Instant instant) {
-      this.s = s;
-      this.c = c;
+      this.s = Objects.requireNonNull(s);
+      this.c = Objects.requireNonNull(c);
       this.instant = instant;
     }
 

@@ -54,7 +54,7 @@ public class Camel implements ModelApi {
   }
 
   String getModel(String api) {
-    String s = new Http().get(url + api);
+    String s = new Http().get(url + api, headers);
     JsonArray array = JsonParser.parseString(s).getAsJsonObject().get("models").getAsJsonArray();
     if (array.isEmpty()) return null;
     System.out.println(s);

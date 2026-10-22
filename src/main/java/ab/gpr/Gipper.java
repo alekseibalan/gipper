@@ -82,7 +82,7 @@ public class Gipper {
   }
 
   public List<Chat.Message> gipp(UUID uuid, String s) {
-    Chat chat = sessions.get(uuid);
+    Chat chat = sessions.computeIfAbsent(uuid, Chat::load);
     chat.add(new Chat.Message(s, Chat.MessageType.USER));
     ArrayList<Chat.Message> list = new ArrayList<>();
     try {
@@ -100,7 +100,7 @@ public class Gipper {
       String outputApi = modelApi.apply(inputApi);
       list.add(new Chat.Message(outputApi, Chat.MessageType.ROBOT));
     } catch (Exception e) {
-      list.add(new Chat.Message(e.getMessage(), Chat.MessageType.ERROR));
+      list.add(new Chat.Message(e.getClass().getSimpleName() + ": " + e.getMessage(), Chat.MessageType.ERROR));
     }
     list.forEach(chat::add); // chat.addAll(list);
     if (chat.title.isEmpty()) {
